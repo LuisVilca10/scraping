@@ -1,0 +1,1 @@
+export const MOMGO_URI = import.meta.env.VITE_MONGO_URI;
