@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from './constants/firebaseConfig';
+import { NavLink } from 'react-router-dom';
 
 function App() {
   const [noticias, setNoticias] = useState([]);
 
   useEffect(() => {
     const fetchNoticias = async () => {
-      const querySnapshot = await getDocs(collection(db, 'noticiastvsur'));
+      const querySnapshot = await getDocs(collection(db, 'noticias'));
       const noticiasArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setNoticias(noticiasArray);
     };
@@ -19,16 +20,67 @@ function App() {
   console.log(noticias);
   return (
     <>
+      {/* nav bar */}
       <div>
-        {/* nav bar */}
-        <div className="bg-[#054D88] w-full">
-          <div className=" container mx-auto w-full m-auto items-center text-center text-white uppercase md:text-5xl text-2xl py-3 font-black">
+        <div className="bg-[#054D88] w-full text-white">
+          <div className=" container mx-auto w-full m-auto items-center text-center uppercase md:text-4xl text-2xl py-3 font-black">
             Portal web de noticias con Scraping
           </div>
+          <div className='bg-gray-500 py-2 font-light text-sm lg:text-lg'>
+            <div className='container mx-auto flex justify-center uppercase'>
+              <li className="flex items-center">
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive ? "border-b-2" : "py-2 rounded-lg px-3"
+                  }
+                  to="/"
+                >
+                  INICIO
+                </NavLink>
+              </li>
+              <li className="flex items-center">
+                <NavLink
+                  className="py-2 rounded-lg px-4"
+                  activeClassName="font-bold text-blue-500"
+                  to="/productos"
+                >
+                  Deportes
+                </NavLink>
+              </li>
+              <li className="flex items-center">
+                <NavLink
+                  className="py-2 rounded-lg px-3"
+                  activeClassName="font-bold text-blue-500"
+                  to="/confirma"
+                >
+                  Politica
+                </NavLink>
+              </li>
+              <li className="flex items-center">
+                <NavLink
+                  className="py-2 rounded-lg px-3"
+                  activeClassName="font-bold text-blue-500"
+                  to="/contactanos"
+                >
+                  Noticias
+                </NavLink>
+              </li>
+              <li className="flex items-center">
+                <NavLink
+                  className="py-2 rounded-lg px-3"
+                  activeClassName="font-bold text-blue-500"
+                  to="/libro-de-visitas"
+                >
+                  Contactanos
+                </NavLink>
+              </li>
+            </div>
+          </div>
+
         </div>
       </div>
       {/*  */}
-      * <section className="w-full gradient-form">
+      <section className="w-full gradient-form">
         <div className="container mx-auto h-full w-full">
           <div className="flex justify-center w-full  my-5 items-center flex-wrap h-full g-6 text-white ">
             <div className="xl:w-10/12 border">
@@ -101,15 +153,13 @@ function App() {
           {/* Sección de Noticias Regionales */}
           <div className="col-span-2">
             <div className="flex mb-4">
-              <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Regionales</h2>
+              <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Noticias Regionaes</h2>
               <a href='#' className="text-gray-600 mt-1 ml-3">Ver más</a>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {noticias.map((noticia, index) => (
-                <Card
-                  key={index}
-                  className="border rounded-lg shadow-lg overflow-hidden"
-                >
+             
+              {noticias.slice(0, 5).map((noticia, index) => (
+                <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
                   <img
                     src={noticia.image}
                     alt={noticia.titulo}
@@ -117,8 +167,36 @@ function App() {
                   />
                   <div className="p-4">
                     <h3 className="font-semibold text-lg line-clamp-2">{noticia.titulo}</h3>
-                    <p className="text-gray-600 mt-2 text-sm">{noticia.descripcion}</p>
-                    <p className="text-[#054D88] mt-5 text-end text-xs">Fecha: {noticia.fecha}</p>
+                    <p className="text-gray-600 mt-2 text-sm line-clamp-2">{noticia.descripcion}</p>
+                    <div className='flex justify-between mt-3 gap-x-2'>
+                      <p className="text-gray-500 text-end text-xs">Fuente: {noticia.fuente}</p>
+                      <p className="text-[#054D88] text-end text-xs">Fecha: {noticia.fecha}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex my-5">
+              <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Deportes</h2>
+              <a href='#' className="text-gray-600 mt-1 ml-3">Ver más</a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* Limitando el número de noticias a 6 */}
+              {noticias.slice(0, 5).map((noticia, index) => (
+                <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
+                  <img
+                    src={noticia.image}
+                    alt={noticia.titulo}
+                    className="align-middle h-full w-full object-contain"
+                  />
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg line-clamp-2">{noticia.titulo}</h3>
+                    <p className="text-gray-600 mt-2 text-sm line-clamp-2">{noticia.descripcion}</p>
+                    <div className='flex justify-between mt-3 gap-x-2'>
+                      <p className="text-gray-500 text-end text-xs">Fuente: {noticia.fuente}</p>
+                      <p className="text-[#054D88] text-end text-xs">Fecha: {noticia.fecha}</p>
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -128,8 +206,8 @@ function App() {
           {/* Sección de Últimas Noticias */}
           <div className="col-span-1 px-12 py-4">
             <h2 className="text-xl font-bold mb-4">Últimas Noticias</h2>
-            {noticias.map((noticia) => (
-              <ul className="divide-y divide-gray-200">
+            {noticias.map((noticia, index) => (
+              <ul key={index} className="divide-y divide-gray-200">
                 <li className="py-2">
                   <a href="#" className="block text-gray-800 hover:text-[#357cb6]">
                     <h4 className="font-semibold">{noticia.titulo}</h4>
@@ -137,11 +215,11 @@ function App() {
                   <p className="text-[#054D88] text-xs">Fecha: {noticia.fecha}</p>
                 </li>
               </ul>
-
             ))}
           </div>
         </div>
       </section>
+
       {/*  */}
       {/*  */}
       <footer className="bg-[#054D88] text-black py-1">
