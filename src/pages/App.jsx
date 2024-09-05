@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from './constants/firebaseConfig';
-import { NavLink } from 'react-router-dom';
+import { db } from '../constants/firebaseConfig';
+import Navbar from '../components/moleculas/Navbar';
+import Footer from '../components/moleculas/Footer';
+import { Link } from 'react-router-dom';
 
 function App() {
   const [noticias, setNoticias] = useState([]);
@@ -11,76 +13,33 @@ function App() {
     const fetchNoticias = async () => {
       const querySnapshot = await getDocs(collection(db, 'noticias'));
       const noticiasArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setNoticias(noticiasArray);
+      setNoticias(shuffle(noticiasArray));
     };
 
     fetchNoticias();
   }, []);
 
+  if (noticias.length === 0) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
+
+  function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+  }
   console.log(noticias);
   return (
     <>
-      {/* nav bar */}
-      <div>
-        <div className="bg-[#054D88] w-full text-white">
-          <div className=" container mx-auto w-full m-auto items-center text-center uppercase md:text-4xl text-2xl py-3 font-black">
-            Portal web de noticias con Scraping
-          </div>
-          <div className='bg-gray-500 py-2 font-light text-sm lg:text-lg'>
-            <div className='container mx-auto flex justify-center uppercase'>
-              <li className="flex items-center">
-                <NavLink
-                  className={({ isActive }) =>
-                    isActive ? "border-b-2" : "py-2 rounded-lg px-3"
-                  }
-                  to="/"
-                >
-                  INICIO
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  className="py-2 rounded-lg px-4"
-                  activeClassName="font-bold text-blue-500"
-                  to="/productos"
-                >
-                  Deportes
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  className="py-2 rounded-lg px-3"
-                  activeClassName="font-bold text-blue-500"
-                  to="/confirma"
-                >
-                  Politica
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  className="py-2 rounded-lg px-3"
-                  activeClassName="font-bold text-blue-500"
-                  to="/contactanos"
-                >
-                  Noticias
-                </NavLink>
-              </li>
-              <li className="flex items-center">
-                <NavLink
-                  className="py-2 rounded-lg px-3"
-                  activeClassName="font-bold text-blue-500"
-                  to="/libro-de-visitas"
-                >
-                  Contactanos
-                </NavLink>
-              </li>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      <Navbar />
       {/*  */}
-      <section className="w-full gradient-form">
+      {/* <section className="w-full gradient-form">
         <div className="container mx-auto h-full w-full">
           <div className="flex justify-center w-full  my-5 items-center flex-wrap h-full g-6 text-white ">
             <div className="xl:w-10/12 border">
@@ -143,7 +102,7 @@ function App() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       {/*  */}
 
 
@@ -154,10 +113,35 @@ function App() {
           <div className="col-span-2">
             <div className="flex mb-4">
               <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Noticias Regionaes</h2>
+              <Link to={"/noticias"} href='#' className="text-gray-600 mt-1 ml-3">Ver más</Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+              {noticias.slice(0, 5).map((noticia, index) => (
+                <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
+                  <img
+                    src={noticia.image}
+                    alt={noticia.titulo}
+                    className="align-middle h-full w-full object-contain"
+                  />
+                  <div className="p-4">
+                    <Link to={`/noticiadetalle/${noticia.id}`}><h3 className="font-semibold text-lg line-clamp-2 hover:text-[#357cb6]">{noticia.titulo}</h3></Link>
+                    <p className="text-gray-600 mt-2 text-sm line-clamp-2">{noticia.descripcion}</p>
+                    <div className='flex justify-between mt-3 gap-x-2'>
+                      <p className="text-gray-500 text-end text-xs">Fuente: {noticia.fuente}</p>
+                      <p className="text-[#054D88] text-end text-xs">Fecha: {noticia.fecha}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex my-5">
+              <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Deportes</h2>
               <a href='#' className="text-gray-600 mt-1 ml-3">Ver más</a>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-             
+              {/* Limitando el número de noticias a 6 */}
               {noticias.slice(0, 5).map((noticia, index) => (
                 <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
                   <img
@@ -178,7 +162,7 @@ function App() {
             </div>
 
             <div className="flex my-5">
-              <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Deportes</h2>
+              <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Politica</h2>
               <a href='#' className="text-gray-600 mt-1 ml-3">Ver más</a>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -219,31 +203,9 @@ function App() {
           </div>
         </div>
       </section>
+      {/*  */}
 
-      {/*  */}
-      {/*  */}
-      <footer className="bg-[#054D88] text-black py-1">
-        <div className="container mx-auto">
-          <div className="mx-8 lg:mx-3 flex flex-col gap-y-4 lg:flex-row items-center justify-between py-2 text-center ">
-            <div className="flex gap-x-3 flex-col items-center">
-              {/* <img
-                className="h-10 w-1/2"
-                src="../src/assets/logo.png"
-                alt=""
-              /> */}
-              <div className=" font-serif text-white ">
-                30 de agosto del 2024
-              </div>
-            </div>
-            <div className="flex gap-x-2 items-center">
-              <div className="text-center lg:text-left text-white">
-                © 2024 LuisDev´s , All rights reserved.
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
-      {/*  */}
+      <Footer />
     </>
 
   )
