@@ -171,7 +171,7 @@ function App() {
 
             <div className="flex my-5">
               <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Politica</h2>
-              <a href='#' className="text-gray-600 mt-1 ml-3">Ver más</a>
+              <Link to={"/politicas"} href='#' className="text-gray-600 mt-1 ml-3">Ver más</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Limitando el número de noticias a 6 */}
