@@ -36,7 +36,7 @@ function Navbar() {
                                    className={({ isActive }) =>
                                     isActive ? "border-b-2 mx-3" : "py-2 rounded-lg px-3"
                                 }
-                                    to="/confirma"
+                                    to="/politicas"
                                 >
                                     Politica
                                 </NavLink>
@@ -51,16 +51,16 @@ function Navbar() {
                                     Noticias
                                 </NavLink>
                             </li>
-                            <li className="flex items-center">
+                            {/* <li className="flex items-center">
                                 <NavLink
                                     className={({ isActive }) =>
                                         isActive ? "border-b-2 mx-3" : "py-2 rounded-lg px-3"
                                     }
-                                    to="/libro-de-visitas"
+                                    to="/"
                                 >
                                     Contactanos
                                 </NavLink>
-                            </li>
+                            </li> */}
                         </div>
                     </div>
 

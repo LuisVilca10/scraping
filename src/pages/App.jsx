@@ -8,12 +8,20 @@ import { Link } from 'react-router-dom';
 
 function App() {
   const [noticias, setNoticias] = useState([]);
+  const [deportes, setDeportes] = useState([]);
+  const [politica, setPolitica] = useState([]);
 
   useEffect(() => {
     const fetchNoticias = async () => {
       const querySnapshot = await getDocs(collection(db, 'noticias'));
+      const querydeportes = await getDocs(collection(db, 'deportes'));
+      const queryolitica = await getDocs(collection(db, 'politica'));
       const noticiasArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const deportessArray = querydeportes.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const politicasArray = queryolitica.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setNoticias(shuffle(noticiasArray));
+      setDeportes(shuffle(deportessArray));
+      setPolitica(shuffle(politicasArray));
     };
 
     fetchNoticias();
@@ -138,11 +146,11 @@ function App() {
 
             <div className="flex my-5">
               <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Deportes</h2>
-              <a href='#' className="text-gray-600 mt-1 ml-3">Ver más</a>
+              <Link to={"/deportes"} href='#' className="text-gray-600 mt-1 ml-3">Ver más</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Limitando el número de noticias a 6 */}
-              {noticias.slice(0, 5).map((noticia, index) => (
+              {deportes.slice(0, 5).map((noticia, index) => (
                 <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
                   <img
                     src={noticia.image}
@@ -150,7 +158,7 @@ function App() {
                     className="align-middle h-full w-full object-contain"
                   />
                   <div className="p-4">
-                    <h3 className="font-semibold text-lg line-clamp-2">{noticia.titulo}</h3>
+                    <Link to={`/deportedetalle/${noticia.id}`}><h3 className="font-semibold text-lg line-clamp-2 hover:text-[#357cb6]">{noticia.titulo}</h3></Link>
                     <p className="text-gray-600 mt-2 text-sm line-clamp-2">{noticia.descripcion}</p>
                     <div className='flex justify-between mt-3 gap-x-2'>
                       <p className="text-gray-500 text-end text-xs">Fuente: {noticia.fuente}</p>
@@ -167,7 +175,7 @@ function App() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Limitando el número de noticias a 6 */}
-              {noticias.slice(0, 5).map((noticia, index) => (
+              {politica.slice(0, 5).map((noticia, index) => (
                 <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
                   <img
                     src={noticia.image}
@@ -175,7 +183,7 @@ function App() {
                     className="align-middle h-full w-full object-contain"
                   />
                   <div className="p-4">
-                    <h3 className="font-semibold text-lg line-clamp-2">{noticia.titulo}</h3>
+                    <Link to={`/politica/${noticia.id}`}><h3 className="font-semibold text-lg line-clamp-2 hover:text-[#357cb6]">{noticia.titulo}</h3></Link>
                     <p className="text-gray-600 mt-2 text-sm line-clamp-2">{noticia.descripcion}</p>
                     <div className='flex justify-between mt-3 gap-x-2'>
                       <p className="text-gray-500 text-end text-xs">Fuente: {noticia.fuente}</p>
@@ -194,7 +202,7 @@ function App() {
               <ul key={index} className="divide-y divide-gray-200">
                 <li className="py-2">
                   <a href="#" className="block text-gray-800 hover:text-[#357cb6]">
-                    <h4 className="font-semibold">{noticia.titulo}</h4>
+                    <Link to={`/noticiadetalle/${noticia.id}`}><h3 className="font-semibold text-lg line-clamp-2 hover:text-[#357cb6]">{noticia.titulo}</h3></Link>
                   </a>
                   <p className="text-[#054D88] text-xs">Fecha: {noticia.fecha}</p>
                 </li>
