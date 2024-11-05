@@ -7,6 +7,11 @@ import DeporteDe from "../pages/DeporteDetalle"
 import Politica from "../pages/Politica"
 import PoliticaDe from "../pages/PoliticaDetalle"
 import Login from "../pages/Login"
+import Daashboard from "../pages/admin/Daashboard"
+import AdminNoticias from "../pages/admin/AdminNoticias"
+import AdminDeportes from "../pages/admin/AdminDeportes"
+import AdminPolitica from "../pages/admin/AdminPolitica"
+
 
 
 const router = createBrowserRouter(
@@ -47,10 +52,26 @@ const router = createBrowserRouter(
 
         },
         {
-            path:"/login",
-            element: <Login/>,
-         
+            path: "/login",
+            element: <Login />,
+
         },
+        {
+            path: "/admin",
+            element: <Daashboard />
+        },
+        {
+            path: "/admin/noticias",
+            element: <AdminNoticias />
+        },
+        {
+            path: "/admin/deportes",
+            element: <AdminDeportes />
+        },
+        {
+            path: "/admin/politica",
+            element: <AdminPolitica />
+        }
     ]
 )
 
