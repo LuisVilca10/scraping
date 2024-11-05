@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faNewspaper, faTv } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faNewspaper, faSignIn, faTv, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
@@ -22,7 +22,7 @@ const Sidebar = () => {
         >
           Noticiero
         </Link>
-       
+
         <div
           className={
             "md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-1 md:shadow-none shadow absolute top-0 left-0 right-0 z-40 overflow-y-auto overflow-x-hidden h-auto items-center flex-1 rounded " +
@@ -46,12 +46,12 @@ const Sidebar = () => {
                   className="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
                   onClick={() => setCollapseShow("hidden")}
                 >
-                 
+
                 </button>
               </div>
             </div>
           </div>
-         
+
 
           {/* Divider */}
           <hr className="my-4 md:min-w-full border border-black" />
@@ -67,121 +67,101 @@ const Sidebar = () => {
                 className={
                   "text-xs uppercase py-3 font-bold block " +
                   (window.location.href.indexOf("/admin/dashboard") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
+                    ? "text-blue-700 hover:text-blue-600"
+                    : "text-gray-700 hover:text-gray-500")
                 }
-                to="/admin/"
+                to="/admin"
               >
                 <FontAwesomeIcon icon={faTv} className={
-                    "fas fa-tv mr-2 text-sm " +
-                    (window.location.href.indexOf("/admin/dashboard") !== -1
-                      ? "opacity-75"
-                      : "text-blueGray-300")
-                  } />{" "}
+                  "fas fa-tv mr-2 text-sm " +
+                  (window.location.href.indexOf("/admin/dash") !== -1
+                    ? "text-blue-700"
+                    : "text-gray-700")
+                } />{" "}
                 Dashboard
               </Link>
             </li>
-
+            <hr className="my-4 md:min-w-full border border-black" />
+            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+              Scraping
+            </h6>
             <li className="items-center">
               <Link
                 className={
                   "text-xs uppercase py-3 font-bold block " +
-                  (window.location.href.indexOf("/admin/settings") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
+                  (window.location.href.indexOf("/admin/noticias") !== -1
+                    ? "text-blue-700 hover:text-blue-600"
+                    : "text-gray-400 hover:text-gray-400")
                 }
                 to="/admin/noticias"
               >
                 <FontAwesomeIcon icon={faNewspaper} className={
-                    "fas fa-tools mr-2 text-sm " +
-                    (window.location.href.indexOf("/admin/settings") !== -1
-                      ? "opacity-75"
-                      : "text-blueGray-300")
-                  } />{" "}
+                  "fas fa-tools mr-2 text-sm " +
+                  (window.location.href.indexOf("/admin/settings") !== -1
+                    ? "opacity-75"
+                    : "text-blueGray-300")
+                } />{" "}
                 Noticias
               </Link>
               <Link
                 className={
                   "text-xs uppercase py-3 font-bold block " +
-                  (window.location.href.indexOf("/admin/settings") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
+                  (window.location.href.indexOf("/admin/deportes") !== -1
+                    ? "text-blue-700 hover:text-blue-600"
+                    : "text-gray-400 hover:text-gray-400")
                 }
                 to="/admin/deportes"
               >
                 <FontAwesomeIcon icon={faNewspaper} className={
-                    "fas fa-tools mr-2 text-sm " +
-                    (window.location.href.indexOf("/admin/settings") !== -1
-                      ? "opacity-75"
-                      : "text-blueGray-300")
-                  } />{" "}
+                  "fas fa-tools mr-2 text-sm " +
+                  (window.location.href.indexOf("/admin/deportes") !== -1
+                    ? "text-blue-700"
+                    : "text-gray-400")
+                } />{" "}
                 Deportes
               </Link>
               <Link
                 className={
                   "text-xs uppercase py-3 font-bold block " +
-                  (window.location.href.indexOf("/admin/settings") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
+                  (window.location.href.indexOf("/admin/politica") !== -1
+                    ? "text-blue-700 hover:text-blue-600"
+                    : "text-gray-400 hover:text-gray-400")
                 }
                 to="/admin/politica"
               >
                 <FontAwesomeIcon icon={faNewspaper} className={
-                    "fas fa-tools mr-2 text-sm " +
-                    (window.location.href.indexOf("/admin/settings") !== -1
-                      ? "opacity-75"
-                      : "text-blueGray-300")
-                  } />{" "}
+                  "fas fa-tools mr-2 text-sm " +
+                  (window.location.href.indexOf("/admin/politica") !== -1
+                    ? "opacity-75"
+                    : "text-blueGray-300")
+                } />{" "}
                 Politica
               </Link>
             </li>
-
-            {/* <li className="items-center">
-              <Link
-                className={
-                  "text-xs uppercase py-3 font-bold block " +
-                  (window.location.href.indexOf("/admin/tables") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
-                }
-                to="/admin/tables"
-              >
-                <i
-                  className={
-                    "fas fa-table mr-2 text-sm " +
-                    (window.location.href.indexOf("/admin/tables") !== -1
-                      ? "opacity-75"
-                      : "text-blueGray-300")
-                  }
-                ></i>{" "}
-                Tables
-              </Link>
-            </li> */}
-
-            {/* <li className="items-center">
-              <Link
-                className={
-                  "text-xs uppercase py-3 font-bold block " +
-                  (window.location.href.indexOf("/admin/maps") !== -1
-                    ? "text-lightBlue-500 hover:text-lightBlue-600"
-                    : "text-blueGray-700 hover:text-blueGray-500")
-                }
-                
-              >
-                <i
-                  className={
-                    "fas fa-map-marked mr-2 text-sm " +
-                    (window.location.href.indexOf("/admin/maps") !== -1
-                      ? "opacity-75"
-                      : "text-blueGray-300")
-                  }
-                ></i>{" "}
-                Maps
-              </Link>
-            </li> */}
+            <hr className="my-4 md:min-w-full border border-black" />
+            <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
+              Usuarios
+            </h6>
+            <Link
+              className={
+                "text-xs uppercase py-3 font-bold block " +
+                (window.location.href.indexOf("/admin/users") !== -1
+                  ? "text-blue-700 hover:text-blue-600"
+                  : "text-gray-400 hover:text-gray-400")
+              }
+              to="/admin/politica"
+            >
+              <FontAwesomeIcon icon={faUsers} className={
+                "fas fa-tools mr-2 text-sm " +
+                (window.location.href.indexOf("/admin/users") !== -1
+                  ? "opacity-75"
+                  : "text-blueGray-300")
+              } />{" "}
+              Usuarios
+            </Link>
           </ul>
 
-        
+
 
           {/* Divider */}
           <hr className="my-4 md:min-w-full border border-black" />
@@ -191,90 +171,15 @@ const Sidebar = () => {
           </h6>
           {/* Navigation */}
           <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-            {/* <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/react/colors/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fas fa-paint-brush mr-2 text-blueGray-300 text-base"></i>
-                Styles
-              </a>
-            </li> */}
-{/* 
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/react/alerts/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fab fa-css3-alt mr-2 text-blueGray-300 text-base"></i>
-                CSS Components
-              </a>
-            </li>
 
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/angular/overview/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fab fa-angular mr-2 text-blueGray-300 text-base"></i>
-                Angular
-              </a>
-            </li>
-
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/js/overview/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fab fa-js-square mr-2 text-blueGray-300 text-base"></i>
-                Javascript
-              </a>
-            </li>
-
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/nextjs/overview/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fab fa-react mr-2 text-blueGray-300 text-base"></i>
-                NextJS
-              </a>
-            </li>
-
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/react/overview/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fab fa-react mr-2 text-blueGray-300 text-base"></i>
-                React
-              </a>
-            </li>
-
-            <li className="inline-flex">
-              <a
-                href="https://www.creative-tim.com/learning-lab/tailwind/svelte/overview/notus"
-                target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
-              >
-                <i className="fas fa-link mr-2 text-blueGray-300 text-base"></i>
-                Svelte
-              </a>
-            </li> */}
-
-            <li className="inline-flex">
+            <li className="inline-flex ">
               <Link
                 to={"/"}
                 target="_blank"
-                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold"
+                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold text-gray-700 hover:text-gray-700"
               >
-                <i className="fab fa-vuejs mr-2 text-blueGray-300 text-base"></i>
+                <FontAwesomeIcon icon={faSignIn} className={"fas fa-tools mr-2 text-sm "}
+                />
                 Cerrar Sesion
               </Link>
             </li>
