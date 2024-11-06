@@ -6,10 +6,12 @@ import Navbar from '../components/moleculas/Navbar';
 import Footer from '../components/moleculas/Footer';
 import { Link } from 'react-router-dom';
 
+
 function App() {
   const [noticias, setNoticias] = useState([]);
   const [deportes, setDeportes] = useState([]);
   const [politica, setPolitica] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchNoticias = async () => {
@@ -28,7 +30,13 @@ function App() {
   }, []);
 
   if (noticias.length === 0) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % noticias.length);
+  };
 
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + noticias.length) % noticias.length);
+  };
   function shuffle(array) {
     let currentIndex = array.length, randomIndex;
 
@@ -46,79 +54,45 @@ function App() {
   return (
     <>
       <Navbar />
-      {/*  */}
-      {/* <section className="w-full gradient-form">
-        <div className="container mx-auto h-full w-full">
-          <div className="flex justify-center w-full  my-5 items-center flex-wrap h-full g-6 text-white ">
-            <div className="xl:w-10/12 border">
-              <div className="block shadow-lg rounded-3xl w-full">
-                <div className="lg:flex lg:flex-wrap">
-                  <div class="relative w-full max-w-lg rounded-3xl overflow-hidden">
-                    <img
-                      class="w-full"
-                      src="https://imgmedia.larepublica.pe/612x361/larepublica/original/2024/09/01/66d3806c2d7a032cea208024.png"
-                      alt="logo"
-                    />
-                    <div class="absolute bottom-4 left-4 right-4 font-semibold bg-black bg-opacity-60 text-white py-2 px-4 rounded-md">
-                      <p className="text-[#3794e0] mb-2 font-extralight">Fecha: 2 septiembre, 2024</p>
-                      <a href="#">
-                        PJ dicta 15 meses de prisión preventiva contra policías implicados en secuestro de Iván Siucho
-                      </a>
-                    </div>
-                  </div>
 
-                  <div className="lg:w-7/12 px-6  pb-0.5 md:px-0 text-black">
-                    <div className="container mx-auto py-2 px-5">
-                      <div className="flex bg-white rounded-lg shadow-lg overflow-hidden">
-
-                        <div className="w-1/3">
-                          <img
-                            className="object-cover w-full h-full"
-                            src="https://imgmedia.larepublica.pe/612x361/larepublica/original/2024/09/01/66d3806c2d7a032cea208024.png"
-                            alt="Descripción de la imagen"
-                          />
-                        </div>
-                        <div className="w-2/3 p-4">
-                          <h2 className="text-lg font-semibold">
-                            Trabajador del Parque de las Leyendas murió por asfixia por sumersión
-                          </h2>
-                          <p className="text-[#25679c] mt-2 font-extralight">Fecha: 2 septiembre, 2024</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="container mx-auto py-2 px-5">
-                      <div className="flex bg-white rounded-lg shadow-lg overflow-hidden">
-
-                        <div className="w-1/3">
-                          <img
-                            className="object-cover w-full h-full"
-                            src="https://imgmedia.larepublica.pe/612x361/larepublica/original/2024/09/01/66d3806c2d7a032cea208024.png"
-                            alt="Descripción de la imagen"
-                          />
-                        </div>
-                        <div className="w-2/3 p-4">
-                          <h2 className="text-lg font-semibold">
-                            Trabajador del Parque de las Leyendas murió por asfixia por sumersión
-                          </h2>
-                          <p className="text-[#25679c] mt-2 font-extralight">Fecha: 2 septiembre, 2024</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
-      {/*  */}
 
 
       {/*  */}
-      <section className="container mx-auto my-5 mt-10">
+      <section className="container mx-auto my-5 mt-10 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Sección de Noticias Regionales */}
           <div className="col-span-2">
+            <h2 className="text-2xl font-bold mb-5 ">Destacados del día</h2>
+            <div className="relative w-full h-80 overflow-hidden mb-6">
+              {noticias.map((item, index) => (
+                <div
+                  key={index}
+                  className={`transition-opacity duration-200 ease-in-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'} absolute top-0 left-0 w-full`}
+                >
+                  <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div className="md:w-1/2 bg-[#c5dff5] p-5 flex flex-col justify-center">
+                      <h3 className="text-2xl font-bold mt-2 mb-4">{item.titulo}</h3>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-6">{item.descripcion}</p>
+                    </div>
+                    <div className="md:w-1/2">
+                      <img src={item.image} alt={item.titulo} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={prevSlide}
+                className="absolute top-1/2 left-0.5 transform -translate-y-10 text-blue-600  p-2 rounded-full"
+              >
+                &#10094;
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute top-1/2 right-0.5 transform -translate-y-10 text-blue-600 p-2 rounded-full"
+              >
+                &#10095;
+              </button>
+            </div>
             <div className="flex mb-4">
               <h2 className="text-xl font-bold pr-4 border-r-4 border-[#25679c]">Noticias Regionaes</h2>
               <Link to={"/noticias"} href='#' className="text-gray-600 mt-1 ml-3">Ver más</Link>
@@ -198,7 +172,7 @@ function App() {
           {/* Sección de Últimas Noticias */}
           <div className="col-span-1 px-12 py-4">
             <h2 className="text-xl font-bold mb-4">Últimas Noticias</h2>
-            {noticias.map((noticia, index) => (
+            {noticias.slice(0, 37).map((noticia, index) => (
               <ul key={index} className="divide-y divide-gray-200">
                 <li className="py-2">
                   <a href="#" className="block text-gray-800 hover:text-[#357cb6]">

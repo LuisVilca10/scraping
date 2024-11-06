@@ -1,12 +1,15 @@
+import React from 'react';
 import CardBarChart from "../../components/atoms/admin/CardBarChart";
 import CardLineChart from "../../components/atoms/admin/CardLineChart";
 import CardPageVisits from "../../components/atoms/admin/CardPageVisits";
 import CardSocialTraffic from "../../components/atoms/admin/CardSocialTraffic";
 import Sidebar from "../../components/moleculas/admin/Sidebar";
+import Header from '../../components/atoms/admin/header';
 
 const Daashboard = () => {
   return (
     <>
+      <Header />
       <Sidebar />
       <div className="ml-64 mt-10 pr-7">
         <div className="flex flex-wrap">
@@ -20,7 +23,7 @@ const Daashboard = () => {
             <CardPageVisits />
           </div>
           <div className="w-full xl:w-4/12 px-4">
-             <CardSocialTraffic />
+            <CardSocialTraffic />
           </div>
         </div>
       </div>

@@ -3,11 +3,11 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../constants/firebaseConfig";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faFileExport, faPlus, faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const AdminNoticias = () => {
   const [noticias, setNoticias] = useState([]);
-
+  const [searchTerm, setSearchTerm] = useState('');
   // Función para obtener las noticias desde Firestore
   const fetchNoticias = async () => {
     const noticiasCollection = collection(db, "noticias");
@@ -26,11 +26,33 @@ const AdminNoticias = () => {
 
   return (
     <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+      <div className="flex justify-between items-center px-4 py-3 bg-gray-50 rounded-t-lg">
+        <div className="flex items-center bg-white shadow-sm rounded-lg">
+          <FontAwesomeIcon icon={faSearch} className="text-gray-400 ml-2" />
+          <input
+            type="text"
+            placeholder="Buscar Noticia"
+            className="outline-none px-2 py-3 bg-transparent w-96 text-gray-600 text-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex space-x-3 text-sm">
+          <button className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg flex items-center">
+            <FontAwesomeIcon icon={faFileExport} className="mr-2" />
+            Exportar
+          </button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center ">
+            <FontAwesomeIcon icon={faPlus} className="mr-2" />
+            Nueva Noticia
+          </button>
+        </div>
+      </div>
       <div className="rounded-t mb-0 px-4 py-3 border-0">
         <div className="flex flex-wrap items-center">
-          <div className="relative w-full px-4 max-w-full flex-grow flex-1">
+          <div className="relative w-full max-w-full flex-grow flex-1">
             <h3 className="font-semibold text-base text-blueGray-700">
-              Noticias
+              Noticias Regionales
             </h3>
           </div>
         </div>

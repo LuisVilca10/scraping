@@ -8,12 +8,12 @@ function Navbar() {
                 <div className="bg-[#054D88] w-full text-white">
                     <div className="flex justify-center items-center">
                         
-                        <div className="text-center uppercase md:text-4xl text-2xl py-3 font-black w-full -mr-36">
+                        <div className="text-center uppercase md:text-4xl text-2xl py-3 font-black w-full ">
                             Portal web de noticias con Scraping
                         </div>
                         {/* Botón de login */}
                         <NavLink
-                            className="bg-white text-center mr-10 text-[#054D88] p-1 rounded-lg hover:bg-gray-200"
+                            className="bg-white text-center mr-10 text-[#054D88] text-sm p-1 rounded-lg hover:bg-gray-200"
                             to="/login"
                         >
                             Iniciar Sesion
