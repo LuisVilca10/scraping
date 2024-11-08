@@ -11,6 +11,8 @@ import Daashboard from "../pages/admin/Daashboard"
 import AdminNoticias from "../pages/admin/AdminNoticias"
 import AdminDeportes from "../pages/admin/AdminDeportes"
 import AdminPolitica from "../pages/admin/AdminPolitica"
+import Register from "../pages/Register"
+import AdminUsers from "../pages/admin/AdminUsers"
 
 
 
@@ -57,6 +59,11 @@ const router = createBrowserRouter(
 
         },
         {
+            path: "/register",
+            element: <Register />,
+
+        },
+        {
             path: "/admin",
             element: <Daashboard />
         },
@@ -71,6 +78,10 @@ const router = createBrowserRouter(
         {
             path: "/admin/politica",
             element: <AdminPolitica />
+        },
+        {
+            path: "/admin/users",
+            element: <AdminUsers />
         }
     ]
 )

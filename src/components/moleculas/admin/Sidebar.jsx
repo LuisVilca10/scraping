@@ -149,7 +149,7 @@ const Sidebar = () => {
                   ? "text-blue-700 hover:text-blue-600"
                   : "text-gray-400 hover:text-gray-400")
               }
-              to="/admin/politica"
+              to="/admin/users"
             >
               <FontAwesomeIcon icon={faUsers} className={
                 "fas fa-tools mr-2 text-sm " +

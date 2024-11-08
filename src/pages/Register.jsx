@@ -1,33 +1,34 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../constants/firebaseConfig";
-import { useNavigate } from "react-router-dom";
-import { setToken } from "../helprs/auth";
-import { doc, getDoc } from "firebase/firestore";
 
-
-const Login = () => {
-    const [correo, setCorreo] = useState('');
-    const [contrasena, setContrasena] = useState('');
-    const [error, setError] = useState(null);
+const Register = () => {
     const nav = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [error, setError] = useState('');
 
-    const handleLogin = async (e) => {
+    const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, correo, contrasena);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            setToken(user.accessToken);
-            nav("/admin");
-            alert("Usuario Logeado");
 
-            const userDoc = doc(db, 'usuarios', user.uid);
-            const docSnap = await getDoc(userDoc);
+            // Guardar los datos adicionales en Firestore
+            await setDoc(doc(db, "usuarios", user.uid), {
+                name: name,
+                lastName: lastName,
+                email: email
+            });
 
-            localStorage.setItem("userData", JSON.stringify(docSnap.data()));
-        } catch (error) {
-            setError(error.message);
-            console.error("Error de inicio de sesión:", error);
+            console.log("Usuario registrado y datos guardados en Firestore:", user);
+            nav('/'); // Redireccionar al usuario después de registrarse
+        } catch (err) {
+            setError(err.message);
         }
     };
 
@@ -56,13 +57,47 @@ const Login = () => {
                                         <div className="container m-auto md:p-12">
                                             <div className="text-center">
                                                 <h4 className="font-bold mt-1 mb-8 pb-1 text-4xl">
-                                                    Iniciar Sesión
+                                                    Registrate
                                                 </h4>
                                             </div>
                                             {error && (
                                                 <p className="text-red-500 mb-4">{error}</p>
                                             )}
-                                            <form onSubmit={handleLogin}>
+                                            <form onSubmit={handleRegister}>
+                                                <div className="mb-3">
+                                                    <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="name">
+                                                        Nombre Completo
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            className="w-full pl-8 relative px-3 py-2 mb-3 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                                                            id="name"
+                                                            type="text"
+                                                            placeholder="Juan"
+                                                            value={name}
+                                                            onChange={(e) => setName(e.target.value)}
+                                                            required
+                                                        />
+                                                        <i className="fas fa-user absolute left-3 top-2 text-gray-400"></i>
+                                                    </div>
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="lastname">
+                                                        Apellidos Completo
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            className="w-full pl-8 relative px-3 py-2 mb-3 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                                                            id="lastname"
+                                                            type="text"
+                                                            placeholder="Pérez Pérez"
+                                                            value={lastName}
+                                                            onChange={(e) => setLastName(e.target.value)}
+                                                            required
+                                                        />
+                                                        <i className="fas fa-user absolute left-3 top-2 text-gray-400"></i>
+                                                    </div>
+                                                </div>
                                                 <div className="mb-3">
                                                     <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="email">
                                                         Correo Electrónico
@@ -73,8 +108,8 @@ const Login = () => {
                                                             id="email"
                                                             type="email"
                                                             placeholder="Correo Electrónico"
-                                                            value={correo}
-                                                            onChange={(e) => setCorreo(e.target.value)}
+                                                            value={email}
+                                                            onChange={(e) => setEmail(e.target.value)}
                                                             required
                                                         />
                                                         <i className="fas fa-user absolute left-3 top-2 text-gray-400"></i>
@@ -90,8 +125,8 @@ const Login = () => {
                                                             id="password"
                                                             type="password"
                                                             placeholder="Contraseña"
-                                                            value={contrasena}
-                                                            onChange={(e) => setContrasena(e.target.value)}
+                                                            value={password}
+                                                            onChange={(e) => setPassword(e.target.value)}
                                                             required
                                                         />
                                                         <i className="fas fa-lock absolute left-3 top-2 text-gray-400"></i>
@@ -99,15 +134,15 @@ const Login = () => {
                                                 </div>
                                                 <div className="text-center pt-1 mb-12 pb-1">
                                                     <button className="w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline" type="submit">
-                                                        Ingresar
+                                                        Registrarse
                                                     </button>
                                                 </div>
                                             </form>
 
                                             <hr className="mb-4 border-t" />
-                                            <a href="/register" className="hover:text-blue-600 flex justify-center text-cyan-800">
-                                                ¿Deseas registrarte?
-                                            </a>
+                                            <Link to="/login" className="hover:text-blue-600 flex justify-center text-cyan-800">
+                                                Ya tienes una cuenta? Ingresa!
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
@@ -120,4 +155,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;

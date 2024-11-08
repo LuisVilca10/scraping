@@ -8,6 +8,31 @@ import { faEdit, faFileExport, faFilter, faPlus, faSearch, faTrash } from "@fort
 const Tableadmimpolitica = () => {
   const [noticias, setNoticias] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const exportToCSV = (data, filename = 'politica.csv') => {
+    const csvRows = [];
+    const headers = ['Título', 'Descripción', 'Fuente', 'Fecha'];
+    csvRows.push(headers.join(','));
+  
+    data.forEach(noticia => {
+      const row = [
+        noticia.titulo,
+        noticia.descripcion.replace(/,/g, ''), // Evitar que las comas rompan el CSV
+        noticia.fuente,
+        new Date(noticia.fecha).toLocaleDateString()
+      ];
+      csvRows.push(row.join(','));
+    });
+  
+    const csvContent = `data:text/csv;charset=utf-8,${csvRows.join('\n')}`;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   // Función para obtener las noticias desde Firestore
   const fetchNoticias = async () => {
     const noticiasCollection = collection(db, "politica");
@@ -43,7 +68,7 @@ const Tableadmimpolitica = () => {
           />
         </div>
         <div className="flex space-x-3 text-sm">
-          <button className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg flex items-center">
+          <button className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg flex items-center" onClick={() => exportToCSV(noticias)}>
             <FontAwesomeIcon icon={faFileExport} className="mr-2" />
             Exportar
           </button>
