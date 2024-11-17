@@ -1,19 +1,24 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../constants/firebaseConfig";
+import Swal from "sweetalert2";
 
 const Register = () => {
     const nav = useNavigate();
+    const location = useLocation();
+    const { plan } = location.state || {};
+    console.log(plan)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
-
+    const [loading, setLoading] = useState(false);
     const handleRegister = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
@@ -22,13 +27,32 @@ const Register = () => {
             await setDoc(doc(db, "usuarios", user.uid), {
                 name: name,
                 lastName: lastName,
-                email: email
+                email: email,
+                plan: plan,
+                type_user: 3, //// type-1 = admin --- 2 -> pediodista ------ 3---->usuario normal
             });
 
-            console.log("Usuario registrado y datos guardados en Firestore:", user);
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+            Toast.fire({
+                icon: "success",
+                title: "Usuario registrado exitosamente"
+            });
             nav('/'); // Redireccionar al usuario después de registrarse
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoading(false); // Finaliza el estado de carga
         }
     };
 
@@ -133,8 +157,39 @@ const Register = () => {
                                                     </div>
                                                 </div>
                                                 <div className="text-center pt-1 mb-12 pb-1">
-                                                    <button className="w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline" type="submit">
-                                                        Registrarse
+                                                    <button
+                                                        className={`w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline ${loading ? "opacity-50 cursor-not-allowed" : ""
+                                                            }`}
+                                                        type="submit"
+                                                        disabled={loading}
+                                                    >
+                                                        {loading ? (
+                                                            <div className="flex justify-center items-center">
+                                                                <svg
+                                                                    className="animate-spin h-5 w-5 mr-2 text-white"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    fill="none"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <circle
+                                                                        className="opacity-25"
+                                                                        cx="12"
+                                                                        cy="12"
+                                                                        r="10"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="4"
+                                                                    ></circle>
+                                                                    <path
+                                                                        className="opacity-75"
+                                                                        fill="currentColor"
+                                                                        d="M4 12a8 8 0 018-8v8H4z"
+                                                                    ></path>
+                                                                </svg>
+                                                                Cargando...
+                                                            </div>
+                                                        ) : (
+                                                            "Registrarse"
+                                                        )}
                                                     </button>
                                                 </div>
                                             </form>

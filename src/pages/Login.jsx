@@ -4,30 +4,61 @@ import { auth, db } from "../constants/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { setToken } from "../helprs/auth";
 import { doc, getDoc } from "firebase/firestore";
-
+import Swal from "sweetalert2";
 
 const Login = () => {
     const [correo, setCorreo] = useState('');
     const [contrasena, setContrasena] = useState('');
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const nav = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const userCredential = await signInWithEmailAndPassword(auth, correo, contrasena);
             const user = userCredential.user;
             setToken(user.accessToken);
-            nav("/admin");
-            alert("Usuario Logeado");
 
             const userDoc = doc(db, 'usuarios', user.uid);
             const docSnap = await getDoc(userDoc);
 
-            localStorage.setItem("userData", JSON.stringify(docSnap.data()));
+            // Save user data to local storage
+            const userData = docSnap.data();
+            localStorage.setItem("userData", JSON.stringify(userData));
+
+            // Retrieve and parse user data
+            const retrievedUserData = JSON.parse(localStorage.getItem("userData"));
+
+            // Check the user type
+            if (retrievedUserData.type_user && (retrievedUserData.type_user === 1 || retrievedUserData.type_user === 2)) {
+                nav("/admin");
+            } else {
+                nav("/");
+            }
+
+            // Show success notification
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+            Toast.fire({
+                icon: "success",
+                title: "Usuario logeado exitosamente"
+            });
         } catch (error) {
             setError(error.message);
             console.error("Error de inicio de sesión:", error);
+        } finally {
+            setLoading(false); // Finaliza el estado de carga
         }
     };
 
@@ -98,14 +129,40 @@ const Login = () => {
                                                     </div>
                                                 </div>
                                                 <div className="text-center pt-1 mb-12 pb-1">
-                                                    <button className="w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline" type="submit">
-                                                        Ingresar
+                                                    <button className="w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline" type="submit" disabled={loading}>
+                                                        {loading ? (
+                                                            <div className="flex justify-center items-center">
+                                                                <svg
+                                                                    className="animate-spin h-5 w-5 mr-2 text-white"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    fill="none"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <circle
+                                                                        className="opacity-25"
+                                                                        cx="12"
+                                                                        cy="12"
+                                                                        r="10"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="4"
+                                                                    ></circle>
+                                                                    <path
+                                                                        className="opacity-75"
+                                                                        fill="currentColor"
+                                                                        d="M4 12a8 8 0 018-8v8H4z"
+                                                                    ></path>
+                                                                </svg>
+                                                                Cargando...
+                                                            </div>
+                                                        ) : (
+                                                            "Ingresar"
+                                                        )}
                                                     </button>
                                                 </div>
                                             </form>
 
                                             <hr className="mb-4 border-t" />
-                                            <a href="/register" className="hover:text-blue-600 flex justify-center text-cyan-800">
+                                            <a href="/suscripciones" className="hover:text-blue-600 flex justify-center text-cyan-800">
                                                 ¿Deseas registrarte?
                                             </a>
                                         </div>

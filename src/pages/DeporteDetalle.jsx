@@ -42,7 +42,7 @@ function DeporteDe() {
         <>
             <Navbar />
 
-            <div className="max-w-256 m-auto h-screen">
+            <div className="max-w-256 m-auto h-screen pr-10">
                 <section className="py-10">
                     <div className="grid grid-cols-2 gap-6">
                         <div>

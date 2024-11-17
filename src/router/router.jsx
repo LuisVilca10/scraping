@@ -13,6 +13,7 @@ import AdminDeportes from "../pages/admin/AdminDeportes"
 import AdminPolitica from "../pages/admin/AdminPolitica"
 import Register from "../pages/Register"
 import AdminUsers from "../pages/admin/AdminUsers"
+import Subscripts from "../pages/Subscripts"
 
 
 
@@ -61,6 +62,11 @@ const router = createBrowserRouter(
         {
             path: "/register",
             element: <Register />,
+
+        },
+        {
+            path: "/suscripciones",
+            element: <Subscripts />,
 
         },
         {
