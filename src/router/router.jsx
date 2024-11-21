@@ -14,6 +14,11 @@ import AdminPolitica from "../pages/admin/AdminPolitica"
 import Register from "../pages/Register"
 import AdminUsers from "../pages/admin/AdminUsers"
 import Subscripts from "../pages/Subscripts"
+import ProtectedRoute from "./ProtectedRoute"
+import AdminRoute from "./AdminRoute"
+import AccessDenied from "../pages/AccessDenied"
+import AdminSponsors from "../pages/admin/AdminSponsors"
+import AdminQuestions from "../pages/admin/AdminQuestions"
 
 
 
@@ -23,6 +28,10 @@ const router = createBrowserRouter(
             path: "/",
             element: <App />,
 
+        },
+        {
+            path: "/access-denied",
+            element: <AccessDenied />,
         },
         {
             path: "/noticias",
@@ -56,12 +65,20 @@ const router = createBrowserRouter(
         },
         {
             path: "/login",
-            element: <Login />,
+            element: (
+                <ProtectedRoute>
+                    <Login />
+                </ProtectedRoute>
+            ),
 
         },
         {
             path: "/register",
-            element: <Register />,
+            element: (
+                <ProtectedRoute>
+                    <Register />
+                </ProtectedRoute>
+            ),
 
         },
         {
@@ -71,23 +88,59 @@ const router = createBrowserRouter(
         },
         {
             path: "/admin",
-            element: <Daashboard />
+            element: (
+                <AdminRoute>
+                    <Daashboard />
+                </AdminRoute>
+            )
         },
         {
             path: "/admin/noticias",
-            element: <AdminNoticias />
+            element: (
+                <AdminRoute>
+                    <AdminNoticias />
+                </AdminRoute>
+            )
         },
         {
             path: "/admin/deportes",
-            element: <AdminDeportes />
+            element: (
+                <AdminRoute>
+                    <AdminDeportes />
+                </AdminRoute>
+            )
         },
         {
             path: "/admin/politica",
-            element: <AdminPolitica />
+            element: (
+                <AdminRoute>
+                    <AdminPolitica />
+                </AdminRoute>
+            )
         },
         {
             path: "/admin/users",
-            element: <AdminUsers />
+            element: (
+                <AdminRoute>
+                    <AdminUsers />
+                </AdminRoute>
+            )
+        },
+        {
+            path: "/admin/sponsor",
+            element: (
+                <AdminRoute>
+                    <AdminSponsors />
+                </AdminRoute>
+            )
+        },
+        {
+            path: "/admin/question",
+            element: (
+                <AdminRoute>
+                    <AdminQuestions />
+                </AdminRoute>
+            )
         }
     ]
 )

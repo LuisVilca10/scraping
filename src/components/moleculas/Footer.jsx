@@ -15,7 +15,7 @@ function Footer() {
                     </div>
                     <div className="flex gap-x-2 items-center">
                         <div className="text-center lg:text-left text-white">
-                            © 2024 LuisDev´s , All rights reserved.
+                            © 2024 Manis-LuisDev´s , All rights reserved.
                         </div>
                     </div>
                 </div>

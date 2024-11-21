@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../../constants/firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faFileExport, faPlus, faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { Dialog } from 'primereact/dialog';
 import { FaEnvelope, FaKey, FaUser } from "react-icons/fa";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, deleteUser, getAuth } from "firebase/auth";
 import Swal from "sweetalert2";
 
 const Tableadminusers = () => {
@@ -14,6 +14,7 @@ const Tableadminusers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState('');
+  const [editingUser, setEditingUser] = useState(null);
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -29,6 +30,7 @@ const Tableadminusers = () => {
       id: doc.id,
       ...doc.data(),
     }));
+    console.log(noticiasList);
     setNoticias(noticiasList);
   };
 
@@ -36,6 +38,7 @@ const Tableadminusers = () => {
   useEffect(() => {
     fetchNoticias();
   }, []);
+
   const filteredNoticias = noticias.filter(noticia =>
     noticia.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     noticia.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,6 +91,119 @@ const Tableadminusers = () => {
       console.log(error)
     } finally {
       setLoading(false); // Finaliza el estado de carga
+    }
+  };
+
+  const handleEdit = (user) => {
+    setEditingUser(user); // Guarda el usuario en edición
+    setName(user.name);
+    setLastName(user.lastName);
+    setEmail(user.email);
+    setTypeUser(user.type_user);
+    setTypePlan(user.plan || '');
+    setVisible(true); // Muestra el modal
+  };
+
+  const handleCancel = () => {
+    setEditingUser(null); // Limpia el usuario en edición
+    setName('');
+    setLastName('');
+    setEmail('');
+    setTypeUser(3);
+    setTypePlan('');
+    setVisible(false); // Cierra el modal
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (editingUser) {
+        // Actualiza los datos del usuario existente
+        const userDoc = doc(db, "usuarios", editingUser.id);
+        await updateDoc(userDoc, {
+          name,
+          lastName,
+          email,
+          type_user: typeuser,
+          plan: typeplan,
+        });
+
+        // Actualiza el estado local
+        setNoticias((prevNoticias) =>
+          prevNoticias.map((noticia) =>
+            noticia.id === editingUser.id
+              ? { ...noticia, name, lastName, email, type_user: typeuser, plan: typeplan }
+              : noticia
+          )
+        );
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Usuario actualizado exitosamente"
+        });
+
+      }
+
+      // Limpia y cierra el modal
+      handleCancel();
+    } catch (err) {
+      console.error("Error al actualizar usuario:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleDelete = async (id) => {
+    try {
+      // Confirmación con SweetAlert2
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¡No podrás recuperar este usuario!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        // Eliminar el documento del usuario en Firestore
+        const userDoc = doc(db, "usuarios", id);
+        await deleteDoc(userDoc);
+
+        // Eliminar al usuario de Firebase Authentication
+        const user = await getAuth().currentUser;
+        if (user.uid === id) {
+          await deleteUser(user);
+        }
+
+        // Actualizar el estado local
+        setNoticias((prevNoticias) =>
+          prevNoticias.filter((noticia) => noticia.id !== id)
+        );
+
+        // Confirmación exitosa
+        Swal.fire(
+          '¡Eliminado!',
+          'El usuario ha sido eliminado correctamente.',
+          'success'
+        );
+      }
+    } catch (error) {
+      console.error("Error al eliminar el usuario:", error);
+      Swal.fire('Error', 'Hubo un problema al eliminar el usuario.', 'error');
     }
   };
 
@@ -165,33 +281,29 @@ const Tableadminusers = () => {
                   {noticia.email}
                 </td>
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  {noticia.plan}
+                  {noticia.plan && noticia.plan.trim() !== "" ? noticia.plan : "Sin plan"}
                 </td>
-                {noticia.type_user === 1 && (<td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  Administrador
-                </td>)}
-                {noticia.type_user === 2 && (<td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  Pediodista
-                </td>)}
-                {noticia.type_user === 3 && (<td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  Cliente
-                </td>)}
+                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                  {noticia.type_user === 1 && "Administrador"}
+                  {noticia.type_user === 2 && "Periodista"}
+                  {noticia.type_user === 3 && "Cliente"}
+                </td>
                 {/* <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                   {new Date(noticia.fecha).toLocaleDateString()}
                 </td> */}
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <button onClick={() => setVisible(true)}>
+                  <button onClick={() => handleEdit(noticia)}>
                     <FontAwesomeIcon icon={faEdit} className={"fas fa-tools ml-3 text-sm "} />
                   </button>
 
-                  <FontAwesomeIcon icon={faTrash} className={"fas fa-tools ml-4 text-sm text-red-600"} />
+                  <FontAwesomeIcon onClick={() => handleDelete(noticia.id)} icon={faTrash} className={"fas fa-tools ml-4 text-sm text-red-600"} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <Dialog header="Nuevo Usuario" visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }}>
-          <form onSubmit={handleRegister}>
+        <Dialog header={editingUser ? "Editar Usuario" : "Nuevo Usuario"} visible={visible} style={{ width: '50vw' }} onHide={handleCancel}>
+          <form onSubmit={editingUser ? handleSave : handleRegister}>
             <div className="mb-3">
               <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="name">
                 Nombre Completo
@@ -313,7 +425,18 @@ const Tableadminusers = () => {
                 <i className="fas fa-lock absolute left-3 top-2 text-gray-400"></i>
               </div>
             </div>
-            <div className="text-center pt-1 mb-12 pb-1">
+            <div className="flex gap-x-20 justify-center text-center pt-1 mb-12 pb-1">
+              <button
+                className={"w-full px-4 py-2 font-bold text-black bg-[#e0e8ee] rounded-full focus:outline-none focus:shadow-outline $"}
+                onClick={handleCancel}
+              >
+
+                <div className="flex justify-center items-center">
+
+                  Cancelar
+                </div>
+
+              </button>
               <button
                 className={`w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline ${loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
@@ -345,7 +468,7 @@ const Tableadminusers = () => {
                     Cargando...
                   </div>
                 ) : (
-                  "Registrarse"
+                  "Guardar"
                 )}
               </button>
             </div>

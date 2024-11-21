@@ -35,7 +35,7 @@ function Navbar() {
                     <div className="flex justify-center items-center">
 
                         <div className="text-center uppercase md:text-4xl text-2xl py-3 font-black w-full ">
-                            Portal web de noticias con Scraping
+                            ManisNews
                         </div>
                         {/* Botón de login */}
 

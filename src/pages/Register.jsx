@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../constants/firebaseConfig";
@@ -16,6 +16,22 @@ const Register = () => {
     const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        // Si `plan` no está definido, redirige a la página de "Suscríbete"
+        if (!plan) {
+            Swal.fire({
+                icon: "info",
+                title: "¡Elige tu suscripción!",
+                text: "Debes seleccionar un plan antes de registrarte.",
+                showConfirmButton: true,
+                confirmButtonText: "Ir a suscripciones",
+            }).then(() => {
+                nav("/suscripciones"); // Redirige a la página de suscripciones
+            });
+        }
+    }, [plan, nav]);
+
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);

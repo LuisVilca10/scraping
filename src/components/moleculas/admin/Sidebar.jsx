@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faNewspaper, faSignIn, faTv, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faHandHoldingDollar, faNewspaper, faQuestion, faSignIn, faTv, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
@@ -86,6 +86,23 @@ const Sidebar = () => {
               Scraping
             </h6>
             <li className="items-center">
+              {/* <Link
+                className={
+                  "text-xs uppercase py-3 font-bold block " +
+                  (window.location.href.indexOf("/admin/politica") !== -1
+                    ? "text-blue-700 hover:text-blue-600"
+                    : "text-gray-400 hover:text-gray-400")
+                }
+                to="/admin/politica"
+              >
+                <FontAwesomeIcon icon={faNewspaper} className={
+                  "fas fa-tools mr-2 text-sm " +
+                  (window.location.href.indexOf("/admin/politica") !== -1
+                    ? "opacity-75"
+                    : "text-blueGray-300")
+                } />{" "}
+                Scraping Noticias
+              </Link> */}
               <Link
                 className={
                   "text-xs uppercase py-3 font-bold block " +
@@ -120,6 +137,7 @@ const Sidebar = () => {
                 } />{" "}
                 Deportes
               </Link>
+
               <Link
                 className={
                   "text-xs uppercase py-3 font-bold block " +
@@ -158,6 +176,40 @@ const Sidebar = () => {
                   : "text-blueGray-300")
               } />{" "}
               Usuarios
+            </Link>
+            <Link
+              className={
+                "text-xs uppercase py-3 font-bold block " +
+                (window.location.href.indexOf("/admin/sponsor") !== -1
+                  ? "text-blue-700 hover:text-blue-600"
+                  : "text-gray-400 hover:text-gray-400")
+              }
+              to="/admin/sponsor"
+            >
+              <FontAwesomeIcon icon={faHandHoldingDollar} className={
+                "fas fa-tools mr-2 text-sm " +
+                (window.location.href.indexOf("/admin/sponsor") !== -1
+                  ? "opacity-75"
+                  : "text-blueGray-300")
+              } />{" "}
+              Patrocinadores
+            </Link>
+            <Link
+              className={
+                "text-xs uppercase py-3 font-bold block " +
+                (window.location.href.indexOf("/admin/question") !== -1
+                  ? "text-blue-700 hover:text-blue-600"
+                  : "text-gray-400 hover:text-gray-400")
+              }
+              to="/admin/question"
+            >
+              <FontAwesomeIcon icon={faQuestion} className={
+                "fas fa-tools mr-2 text-sm " +
+                (window.location.href.indexOf("/admin/question") !== -1
+                  ? "opacity-75"
+                  : "text-blueGray-300")
+              } />{" "}
+              Preguntas al Publico
             </Link>
           </ul>
 
