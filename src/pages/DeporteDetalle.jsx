@@ -4,12 +4,15 @@ import Footer from "../components/moleculas/Footer";
 import Navbar from "../components/moleculas/Navbar";
 import { BsFacebook, BsTwitter, BsWhatsapp } from 'react-icons/bs';
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../constants/firebaseConfig";
 
 function DeporteDe() {
     const { id } = useParams();
     const [noticia, setNoticia] = useState(null);
+    const [comments, setComments] = useState([]);
+    const userData = JSON.parse(localStorage.getItem('userData')) || null;
+    const [newComment, setNewComment] = useState("");
 
     useEffect(() => {
         const fetchNoticia = async () => {
@@ -31,19 +34,53 @@ function DeporteDe() {
                 console.error('Error fetching document:', error);
             }
         };
+        const fetchComments = () => {
+            const commentsRef = collection(db, "deportes", id, "comments");
+            const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
+                const commentsData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setComments(
+                    commentsData.sort((a, b) => b.createdAt - a.createdAt) // Ordenar comentarios por fecha descendente
+                );
+            });
+
+            return unsubscribe;
+        };
 
         fetchNoticia();
+        const unsubscribe = fetchComments();
+        return () => unsubscribe();
     }, [id]);
 
-    
-    if (!noticia) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
 
+    if (!noticia) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
+    const handleAddComment = async () => {
+        if (!newComment.trim()) {
+            alert("El comentario no puede estar vacío");
+            return;
+        }
+
+        try {
+            const commentsRef = collection(db, 'deportes', id, 'comments');
+            await addDoc(commentsRef, {
+                usercoment: userData.name + " " + userData.lastName,
+                text: newComment,
+                createdAt: new Date(),
+            });
+            alert("bien echo")
+            setNewComment(""); // Limpiar el campo de texto
+        } catch (error) {
+            console.error("Error adding comment:", error);
+        }
+    };
     return (
         <>
             <Navbar />
 
             <div className="max-w-256 m-auto h-screen pr-10">
-                <section className="py-10">
+                <section className="container mx-auto   mb-2 mt-5">
                     <div className="grid grid-cols-2 gap-6">
                         <div>
                             <div className="rounded-lg overflow-hidden mb-5">
@@ -86,6 +123,43 @@ function DeporteDe() {
                         </div>
                     </div>
                 </section>
+                <div className="container mx-auto ">
+                    <p className="text-lg font-semibold mb-2">Comentarios</p>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="text"
+                            className="border rounded px-4 py-2 flex-grow"
+                            placeholder="Escribe un comentario..."
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                        />
+                        <button
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            onClick={handleAddComment}
+                        >
+                            Enviar
+                        </button>
+                    </div>
+                    <div className="space-y-4 mt-2 mb-5">
+                        {comments.length === 0 && (
+                            <p className="text-gray-500">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+                        )}
+                        {comments.map((comment) => (
+                            <div key={comment.id} className="p-4 border rounded-lg">
+                                <p className="text-sm text-gray-700">
+                                    <strong>{comment.usercoment}</strong> -{" "}
+                                    <span className="text-gray-500">
+                                        {/* Usar toDate() para convertir el Timestamp a una fecha válida */}
+                                        {comment.createdAt?.toDate
+                                            ? comment.createdAt.toDate().toLocaleString()
+                                            : "Fecha inválida"}
+                                    </span>
+                                </p>
+                                <p className="text-gray-800">{comment.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <Footer />

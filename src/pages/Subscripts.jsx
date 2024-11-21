@@ -4,14 +4,18 @@ import Navbar from "../components/moleculas/Navbar";
 import { FaCar, FaPlane, FaTrain } from "react-icons/fa"; // Usa react-icons 
 import { Card } from 'primereact/card';
 import { useNavigate } from "react-router-dom";
+import PayPalButton from "../helprs/paypalButton";
 
 const Subscripts = () => {
     const nav = useNavigate();
-    const handleSubscription = (plan) => {
-        alert(`Redirigiendo al registro del plan: ${plan}`);
-        nav('/register', { state: { plan } });
-    };
 
+    const handlePaymentSuccess = (details, plan) => {
+        nav("/register", { state: { plan } });
+        setPaymentApproved(true); // Actualiza el estado cuando el pago sea exitoso
+        alert(`Transacción completada por ${details.payer.name.given_name}`);
+        console.log("Detalles de la transacción: ", details);
+        // Puedes guardar detalles en Firebase aquí si es necesario
+    };
     return (
         <div>
             <Navbar />
@@ -34,9 +38,15 @@ const Subscripts = () => {
                                 <p> <span className="font-extrabold text-lg text-green-800">✓</span> Acceso limitado al contenido: Noticias generales y de libre acceso.</p>
                                 <p> <span className="font-extrabold text-lg text-red-800">X</span> Acceso limitado al contenido: Noticias generales y de libre acceso.</p>
                             </div>
-                            <button className="mt-5 bg-[#054D88] px-3 py-2 text-white rounded-xl" onClick={() => handleSubscription('Básico')}>
+                            {/* <button className="mt-5 bg-[#054D88] px-3 py-2 text-white rounded-xl" onClick={() => handleSubscription('Básico')}>
                                 Suscribirse
-                            </button>
+                            </button> */}
+                            <PayPalButton
+                                price="4.00"
+                                onSuccess={(details) => handlePaymentSuccess(details, "Básico")}
+                            />
+                            {/* Botón de Suscribirse */}
+
                         </div>
                     </div>
 

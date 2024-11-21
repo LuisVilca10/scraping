@@ -9,21 +9,58 @@ import Footer from "../components/moleculas/Footer";
 function Noticias() {
     const [noticias, setNoticias] = useState([]);
     const [sponsor, setSponsor] = useState([]);
+    const [questions, setQuestions] = useState([]);
+    const [answeredQuestions, setAnsweredQuestions] = useState([]);
     const [visibleNoticias, setVisibleNoticias] = useState(15);
+    const [otherAnswers, setOtherAnswers] = useState({});
     const userData = JSON.parse(localStorage.getItem('userData')) || null;
     const [loadMoreCount, setLoadMoreCount] = useState(0);
+    const [selectedAnswers, setSelectedAnswers] = useState({});
+    const [searchText, setSearchText] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [filteredDeportes, setFilteredDeportes] = useState([]);
     useEffect(() => {
         const fetchNoticias = async () => {
             const querySnapshot = await getDocs(collection(db, 'noticias'));
             const querysponsors = await getDocs(collection(db, 'sponsors'));
+            const queryquestions = await getDocs(collection(db, 'questions'));
             const noticiasArray = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             const sponsorArray = querysponsors.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const questionsArray = queryquestions.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setNoticias(noticiasArray);
             setSponsor(sponsorArray);
+            setQuestions(questionsArray);
+            setFilteredDeportes(noticiasArray);
+            if (userData) {
+                const userResponses = await getDocs(
+                    collection(db, 'respuestas')
+                );
+                const answered = userResponses.docs
+                    .filter(doc => doc.data().userId === userData.uid)
+                    .map(doc => doc.data().questionId);
+                setAnsweredQuestions(answered);
+
+                const others = {};
+                userResponses.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (!others[data.questionId]) {
+                        others[data.questionId] = [];
+                    }
+                    others[data.questionId].push(data.respuesta);
+                });
+                setOtherAnswers(others);
+            }
         };
 
         fetchNoticias();
     }, []);
+    const handleOptionChange = (questionId, respuesta) => {
+        setSelectedAnswers(prev => ({
+            ...prev,
+            [questionId]: respuesta,
+        }));
+    };
     const handleShowMore = () => {
         // Incrementar el número de noticias visibles y el contador de clics
         if (
@@ -34,8 +71,54 @@ function Noticias() {
             setVisibleNoticias((prevCount) => prevCount + 15);
             setLoadMoreCount((prevCount) => prevCount + 1);
         }
-    };    if (noticias.length === 0) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
+    };
+    if (noticias.length === 0) return <div className="flex justify-center items-center h-screen">Cargando...</div>;
+    const handleSubmit = async (questionId) => {
+        if (!selectedAnswers[questionId]) {
+            alert("Por favor, selecciona una opción antes de enviar.");
+            return;
+        }
 
+        try {
+            if (!userData) {
+                alert("Debes iniciar sesión para participar en la encuesta.");
+                return;
+            }
+
+            await addDoc(collection(db, "respuestas"), {
+                userId: userData.uid,
+                questionId: questionId,
+                respuesta: selectedAnswers[questionId],
+                timestamp: serverTimestamp(),
+            });
+
+            setAnsweredQuestions(prev => [...prev, questionId]);
+            alert("¡Gracias por participar en la encuesta!");
+        } catch (error) {
+            console.error("Error al guardar la respuesta:", error);
+            alert("Hubo un problema al guardar tu respuesta. Inténtalo de nuevo.");
+        }
+    };
+    const handleSearch = () => {
+        const filterBySearchText = (items) =>
+            items.filter(item =>
+                item.titulo.toLowerCase().includes(searchText.toLowerCase()) ||
+                item.descripcion.toLowerCase().includes(searchText.toLowerCase())
+            );
+
+        const filterByDateRange = (items) => {
+            if (startDate && endDate) {
+                return items.filter(item => {
+                    const itemDate = new Date(item.fecha);
+                    return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+                });
+            }
+            return items;
+        };
+
+        const filteredDeportesResult = filterByDateRange(filterBySearchText(noticias));
+        setFilteredDeportes(filteredDeportesResult);
+    };
     return (
         <>
             <Navbar />
@@ -49,25 +132,47 @@ function Noticias() {
                             </div>
                         )
                         }
-                        <div className="my-8 p-6 bg-gray-100 rounded shadow-lg">
-                            <h2 className="text-xl font-bold mb-4">Participa en nuestra Encuesta</h2>
-                            <p className="text-gray-700 mb-4">¿Crees que el nuevo proyecto de ley beneficiará a los trabajadores?</p>
-                            <form>
-                                <div className="mb-3">
-                                    <label className="block">
-                                        <input type="radio" name="encuesta" value="si" className="mr-2" /> Sí
-                                    </label>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block">
-                                        <input type="radio" name="encuesta" value="no" className="mr-2" /> No
-                                    </label>
-                                </div>
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    Enviar Respuesta
-                                </button>
-                            </form>
-                        </div>
+                        <h2 className="text-xl font-bold mb-4">Participa en nuestra Encuesta</h2>
+                        {questions.map((item, index) => (
+                            <div key={index} className="my-8 p-6 bg-gray-100 rounded shadow-lg">
+                                <h2 className="text-lg font-semibold mb-4">{item.title}</h2>
+                                <p className="text-gray-700 mb-4">{item.question}</p>
+                                {answeredQuestions.includes(item.id) ? (
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 mb-2">Respuestas de otros usuarios:</h3>
+                                        <ul className="list-disc pl-5">
+                                            {(otherAnswers[item.id]?.slice(0, 5) || []).map((answer, idx) => (
+                                                <li key={idx} className="text-gray-600">{answer}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <form>
+                                        {item.optionresponse.map((option, idx) => (
+                                            <div key={idx} className="mb-3">
+                                                <label className="block">
+                                                    <input
+                                                        type="radio"
+                                                        name={`encuesta-${index}`}
+                                                        value={option}
+                                                        className="mr-2"
+                                                        onChange={() => handleOptionChange(item.id, option)}
+                                                    />{" "}
+                                                    {option}
+                                                </label>
+                                            </div>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            className="bg-blue-500 text-white p-2 rounded"
+                                            onClick={() => handleSubmit(item.id)}
+                                        >
+                                            Enviar Respuesta
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
+                        ))}
                         {(userData === null || userData?.plan === "Básico" || userData?.plan === "Premium") && (
                             <div className="mt-8">
                                 <h2 className="text-xl font-bold mb-4">Patrocinado</h2>
@@ -105,32 +210,36 @@ function Noticias() {
                                     <input
                                         type="text"
                                         placeholder="Buscar noticias..."
-                                        className="flex-grow p-2 outline-none"
+                                        value={searchText}
+                                        onChange={(e) => setSearchText(e.target.value)}
+                                        className="flex-grow p-2 border rounded outline-none"
                                     />
-                                    <button className="px-4 py-2 bg-blue-600 text-white rounded">Buscar</button>
+
                                 </div>
                             </div>
                         )
                         }
-                        {(userData?.plan === "Premium" || userData?.plan === "Super-VIP") && (
+                        {userData?.plan === "Premium" || userData?.plan === "Super-VIP" && (
                             <div className="flex mb-5">
                                 <label className="mr-4 text-gray-700 font-semibold" htmlFor="startDate">Desde:</label>
                                 <input
                                     type="date"
                                     id="startDate"
-                                    className="border rounded px-2 py-1 mr-6"
-
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="border rounded px-2 py-1"
                                 />
                                 <label className="mr-4 text-gray-700 font-semibold" htmlFor="endDate">Hasta:</label>
                                 <input
                                     type="date"
                                     id="endDate"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
                                     className="border rounded px-2 py-1"
-
                                 />
                                 <button
                                     className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-
+                                    onClick={handleSearch}
                                 >
                                     Filtrar
                                 </button>
@@ -139,7 +248,7 @@ function Noticias() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             {(userData?.plan === "Premium" || userData?.plan === "Super-VIP" || userData?.plan === "Básico") && (
                                 <>
-                                    {noticias.slice(0, visibleNoticias).map((noticia, index) => (
+                                    {filteredDeportes.slice(0, visibleNoticias).map((noticia, index) => (
                                         <Card key={index} className="border rounded-lg shadow-lg overflow-hidden">
                                             <img
                                                 src={noticia.image}
@@ -161,7 +270,7 @@ function Noticias() {
                                         </Card>
                                     ))}
 
-                                    <div className="flex justify-center mt-4">
+                                    <div className=" justify-center mt-4">
                                         <button
                                             onClick={handleShowMore}
                                             className={`px-4 py-2 ${((userData?.plan === "Premium" && loadMoreCount >= 3) ||

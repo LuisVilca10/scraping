@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faHandHoldingDollar, faNewspaper, faQuestion, faSignIn, faTv, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faGlobe, faHandHoldingDollar, faNewspaper, faQuestion, faSignIn, faTv, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = () => {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
@@ -224,6 +224,17 @@ const Sidebar = () => {
           {/* Navigation */}
           <ul className="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
 
+            <li className="inline-flex ">
+              <Link
+                to={"/"}
+                target="_blank"
+                className="text-blueGray-700 hover:text-blueGray-500 text-sm block mb-4 no-underline font-semibold text-gray-700 hover:text-gray-700"
+              >
+                <FontAwesomeIcon icon={faGlobe} className={"fas fa-tools mr-2 text-sm "}
+                />
+                Ir a la pagina
+              </Link>
+            </li>
             <li className="inline-flex ">
               <Link
                 to={"/"}

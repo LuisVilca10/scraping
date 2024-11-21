@@ -25,7 +25,10 @@ const Login = () => {
             const docSnap = await getDoc(userDoc);
 
             // Save user data to local storage
-            const userData = docSnap.data();
+            const userData = {
+                uid: user.uid, // UID del usuario
+                ...docSnap.data(), // Datos almacenados en Firestore
+            };
             localStorage.setItem("userData", JSON.stringify(userData));
 
             // Retrieve and parse user data
