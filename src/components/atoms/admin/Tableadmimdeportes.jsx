@@ -1,19 +1,29 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../../../constants/firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faFileExport, faPlus, faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import { Dialog } from "primereact/dialog";
+import { FaImage, FaSmile } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const Tableadmimdeportes = () => {
+  const [visible, setVisible] = useState(false);
+  const [editingNews, setEditingNews] = useState(null);
   const [noticias, setNoticias] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [descripcion, setDescripcion] = useState("");
+  const [image, setImage] = useState("");
+  const [state, setState] = useState(0);
+  const [titulo, setTitulo] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const exportToCSV = (data, filename = 'deportes.csv') => {
     const csvRows = [];
     const headers = ['Título', 'Descripción', 'Fuente', 'Fecha'];
     csvRows.push(headers.join(','));
-  
+
     data.forEach(noticia => {
       const row = [
         noticia.titulo,
@@ -23,7 +33,7 @@ const Tableadmimdeportes = () => {
       ];
       csvRows.push(row.join(','));
     });
-  
+
     const csvContent = `data:text/csv;charset=utf-8,${csvRows.join('\n')}`;
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -33,6 +43,8 @@ const Tableadmimdeportes = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+
   // Función para obtener las noticias desde Firestore
   const fetchNoticias = async () => {
     const noticiasCollection = collection(db, "deportes");
@@ -43,7 +55,163 @@ const Tableadmimdeportes = () => {
     }));
     setNoticias(noticiasList);
   };
+  const handleCancel = () => {
+    setEditingNews(null); // Limpia el usuario en edición
+    setTitulo('');
+    setDescripcion('');
+    setImage('');
+    setState(0);
+    setVisible(false); // Cierra el modal
+  };
+  const handleEdit = (question) => {
+    setEditingNews(question);
+    setTitulo(question.titulo)
+    setState(question.state || 1);
+    setDescripcion(question.descripcion);
+    setVisible(true);
+  };
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+      const newNews = {
+        image: image,
+        titulo: titulo,
+        descripcion: descripcion,
+        state: state,
+        fuente: 'ManisNews',
+        fecha: formattedDate
 
+      };
+
+      // Guardar los datos adicionales en Firestore
+      const docRef =await addDoc(collection(db, "deportes"), newNews);
+
+      const newsWithId = {
+        ...newNews,
+        id: docRef.id // Se obtiene el ID generado automáticamente por Firestore
+      };
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        }
+      });
+
+      setNoticias((prevNoticias) => [newsWithId, ...prevNoticias]);
+
+      setVisible(false);
+      Toast.fire({
+        icon: "success",
+        title: "Noticia registrada exitosamente"
+      });
+      // Redireccionar al usuario después de registrarse
+    } catch (err) {
+      setError(err.message);
+      console.log(err)
+    } finally {
+      setLoading(false); // Finaliza el estado de carga
+    }
+  };
+
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (editingNews) {
+        // Actualiza los datos del usuario existente
+        const today = new Date();
+        const date = today.toISOString().split('T')[0];
+
+        const userDoc = doc(db, "deportes", editingNews.id);
+        await updateDoc(userDoc, {
+          titulo,
+          descripcion,
+          fuente: 'ManisNews',
+          state,
+          fecha: date,
+        });
+
+        // Actualiza el estado local
+        setNoticias((prevNoticias) =>
+          prevNoticias.map((noticia) =>
+            noticia.id === editingNews.id
+              ? { ...noticia, titulo, descripcion }
+              : noticia
+          )
+        );
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+          }
+        });
+        Toast.fire({
+          icon: "success",
+          title: "Noticia actualizado exitosamente"
+        });
+
+      }
+
+      // Limpia y cierra el modal
+      handleCancel();
+    } catch (err) {
+      console.error("Error al actualizar la noticia:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleDelete = async (id) => {
+    try {
+      // Confirmación con SweetAlert2
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: '¡No podrás recuperar esta propaganda!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        // Eliminar la pregunta de Firestore
+        const questionDoc = doc(db, "deportes", id);
+        await deleteDoc(questionDoc);
+
+        // Actualizar el estado local
+        setNoticias((prevNoticias) =>
+          prevNoticias.filter((noticia) => noticia.id !== id)
+        );
+
+        // Confirmación exitosa
+        Swal.fire(
+          '¡Eliminada!',
+          'La Noticia ha sido eliminada correctamente.',
+          'success'
+        );
+      }
+    } catch (error) {
+      console.error("Error al eliminar la pregunta:", error);
+      Swal.fire('Error', 'Hubo un problema al eliminar la propaganda.', 'error');
+    }
+  };
   // Llamada al efecto para obtener las noticias al cargar el componente
   useEffect(() => {
     fetchNoticias();
@@ -70,7 +238,7 @@ const Tableadmimdeportes = () => {
             <FontAwesomeIcon icon={faFileExport} className="mr-2" />
             Exportar
           </button>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center ">
+          <button onClick={() => setVisible(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center ">
             <FontAwesomeIcon icon={faPlus} className="mr-2" />
             Nueva Noticia
           </button>
@@ -125,16 +293,134 @@ const Tableadmimdeportes = () => {
                   {new Date(noticia.fecha).toLocaleDateString()}
                 </td>
                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                  <Link to={`/deportedetalle/${noticia.id}`}>
-                    <FontAwesomeIcon icon={faEdit} className={"fas fa-tools ml-3 text-sm "} />
-                  </Link>
-
-                  <FontAwesomeIcon icon={faTrash} className={"fas fa-tools ml-4 text-sm text-red-600"} />
+                  <FontAwesomeIcon onClick={() => handleEdit(noticia)} icon={faEdit} className={"fas fa-tools ml-3 text-sm "} />
+                  <FontAwesomeIcon onClick={() => handleDelete(noticia.id)} icon={faTrash} className={"fas fa-tools ml-4 text-sm text-red-600"} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        <Dialog header={editingNews ? "Editar Noticia" : "Nuevo Noticia"} visible={visible} style={{ width: '50vw' }} onHide={handleCancel}>
+          <form onSubmit={editingNews ? handleSave : handleRegister}>
+            {
+              !editingNews && (
+                <div className="mb-3">
+                  <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="name">
+                    Link de imagen
+                  </label>
+                  <div className="relative">
+                    <input
+                      className="w-full pl-8 relative px-3 py-2 mb-3 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                      id="image"
+                      type="text"
+                      placeholder="https://images.com"
+                      value={image}
+                      onChange={(e) => setImage(e.target.value)}
+                      required
+                    />
+                    <FaImage className="absolute left-3 top-2.5 text-gray-400" />
+                  </div>
+                </div>
+              )
+            }
+            <div className="mb-3">
+              <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor="name">
+                Titulo
+              </label>
+              <div className="relative">
+                <input
+                  className="w-full pl-8 relative px-3 py-2 mb-3 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
+                  id="titulo"
+                  type="text"
+                  placeholder="Zela Alex será el teniente de Juliaca"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  required
+                />
+                <FaSmile className="absolute left-3 top-2.5 text-gray-400" />
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Descripción
+              </label>
+              <textarea
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                className="w-full px-3 py-3 border rounded-lg  text-sm"
+                placeholder="Escribe una breve descripción..."
+                rows="3"
+                required
+              ></textarea>
+            </div>
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Estado:</label>
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setState(1)}
+                  className={`px-4 py-2 rounded-lg border ${state === 1 ? "bg-blue-100 border-blue-500 text-blue-500" : "border-gray-300 text-gray-500"}`}
+                >
+                  Activo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setState(0)}
+                  className={`px-4 py-2 rounded-lg border ${state === 0 ? "bg-blue-100 border-red-500 text-red-500" : "border-gray-300 text-gray-500"}`}
+                >
+                  Inactivo
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-x-20 justify-center text-center pt-1 mb-12 pb-1">
+              <button
+                className={"w-full px-4 py-2 font-bold text-black bg-[#e0e8ee] rounded-full focus:outline-none focus:shadow-outline $"}
+                onClick={handleCancel}
+              >
+
+                <div className="flex justify-center items-center">
+
+                  Cancelar
+                </div>
+
+              </button>
+              <button
+                className={`w-full px-4 py-2 font-bold text-white bg-[#054D88] rounded-full focus:outline-none focus:shadow-outline ${loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex justify-center items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    Cargando...
+                  </div>
+                ) : (
+                  "Guardar"
+                )}
+              </button>
+            </div>
+          </form>
+        </Dialog>
       </div>
     </div>
   );
